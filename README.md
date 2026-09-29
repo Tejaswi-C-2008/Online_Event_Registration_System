@@ -1,4 +1,4 @@
-# mana tho aata oddu beta e Event Registration System — NRD Lab Project
+#  Online Event Registration System — NRD Lab Project
 
 [![Java](https://img.shields.io/badge/Java-17%20%7C%2021-orange.svg)](https://www.oracle.com/java/)
 [![Jakarta Servlets](https://img.shields.io/badge/Jakarta%20Servlets-5.0.0-blue.svg)](https://jakarta.ee/)
