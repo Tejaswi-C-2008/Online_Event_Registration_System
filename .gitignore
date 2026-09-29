@@ -1,0 +1,38 @@
+# Compiled class files
+target/
+target_classes/
+*.class
+
+# Log files
+*.log
+
+# Package Files
+*.jar
+*.war
+*.ear
+*.zip
+*.tar.gz
+*.rar
+
+# Embedded H2 Database temporary lock files
+data/*.lock.db
+data/*.trace.db
+
+# Virtual machine crash logs
+hs_err_pid*
+replay_pid*
+
+# IDE & Editor files
+.idea/
+*.iml
+.vscode/
+.settings/
+.project
+.classpath
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Claude settings & worktrees
+.claude/worktrees/
