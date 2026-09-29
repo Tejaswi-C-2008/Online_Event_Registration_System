@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Control Center — EventHub</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-custom">
+        <div class="container">
+            <a class="navbar-brand brand-logo" href="index.html">
+                <div class="brand-icon"><i class="bi bi-shield-lock-fill"></i></div>
+                <span>EventHub Admin</span>
+            </a>
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarMain">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4">
+                    <li class="nav-item"><a class="nav-link active" href="admin.html">Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link" href="analytics.html">Analytics</a></li>
+                    <li class="nav-item"><a class="nav-link" href="events.html" target="_blank">Live Site <i class="bi bi-box-arrow-up-right small"></i></a></li>
+                </ul>
+                <div id="navbar-auth-section"></div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Admin Header -->
+    <header class="bg-dark text-white py-4" style="background: linear-gradient(135deg, #0f172a, #1e293b) !important;">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                <div>
+                    <h2 class="fw-bold mb-1"><i class="bi bi-speedometer2 me-2"></i>Administration Portal</h2>
+                    <p class="text-slate-400 mb-0">Create events, adjust capacity, view attendee bookings, and monitor revenue.</p>
+                </div>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-primary-custom btn-sm" onclick="openCreateEventModal()">
+                        <i class="bi bi-plus-lg me-1"></i> Add New Event
+                    </button>
+                    <a href="analytics.html" class="btn btn-outline-light btn-sm">
+                        <i class="bi bi-bar-chart-fill me-1"></i> View Analytics
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="py-5 bg-light">
+        <div class="container">
+            <!-- KPI Stat Cards -->
+            <div class="row g-4 mb-5" id="admin-kpi-row">
+                <div class="col-md-3 col-sm-6">
+                    <div class="kpi-card">
+                        <div class="kpi-icon indigo"><i class="bi bi-calendar-event"></i></div>
+                        <div>
+                            <div class="kpi-value" id="kpiTotalEvents">0</div>
+                            <div class="kpi-label">Total Events</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-6">
+                    <div class="kpi-card">
+                        <div class="kpi-icon cyan"><i class="bi bi-ticket-perforated"></i></div>
+                        <div>
+                            <div class="kpi-value" id="kpiActiveRegistrations">0</div>
+                            <div class="kpi-label">Active Bookings</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-6">
+                    <div class="kpi-card">
+                        <div class="kpi-icon emerald"><i class="bi bi-cash-stack"></i></div>
+                        <div>
+                            <div class="kpi-value" id="kpiTotalRevenue">$0</div>
+                            <div class="kpi-label">Total Revenue</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-6">
+                    <div class="kpi-card">
+                        <div class="kpi-icon amber"><i class="bi bi-people"></i></div>
+                        <div>
+                            <div class="kpi-value" id="kpiTotalUsers">0</div>
+                            <div class="kpi-label">Registered Users</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabs: Events Management & Attendee Registrations -->
+            <ul class="nav nav-pills mb-4" id="adminTab" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active fw-semibold" id="events-tab" data-bs-toggle="tab" data-bs-target="#tab-events" type="button" role="tab">
+                        <i class="bi bi-calendar-check me-2"></i>Events Management
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link fw-semibold" id="attendees-tab" data-bs-toggle="tab" data-bs-target="#tab-attendees" type="button" role="tab" onclick="loadAdminAttendees()">
+                        <i class="bi bi-people me-2"></i>Attendee Bookings
+                    </button>
+                </li>
+            </ul>
+
+            <div class="tab-content" id="adminTabContent">
+                <!-- Tab 1: Events Management Table -->
+                <div class="tab-pane fade show active" id="tab-events" role="tabpanel">
+                    <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+                        <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                            <h5 class="fw-bold mb-0">All Managed Events</h5>
+                            <button class="btn btn-primary-custom btn-sm" onclick="openCreateEventModal()">
+                                <i class="bi bi-plus-lg me-1"></i> New Event
+                            </button>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Event Title</th>
+                                        <th>Category</th>
+                                        <th>Date &amp; Time</th>
+                                        <th>Seats (Booked / Cap)</th>
+                                        <th>Price</th>
+                                        <th>Status</th>
+                                        <th class="text-end">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="admin-events-table-body">
+                                    <tr><td colspan="8" class="text-center py-4 text-muted">Loading events...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab 2: Attendee Registrations Table -->
+                <div class="tab-pane fade" id="tab-attendees" role="tabpanel">
+                    <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+                        <div class="card-header bg-white py-3">
+                            <h5 class="fw-bold mb-0">All Attendee Registrations</h5>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Ticket Code</th>
+                                        <th>Attendee Name</th>
+                                        <th>Event Title</th>
+                                        <th>Tickets</th>
+                                        <th>Total Paid</th>
+                                        <th>Booking Date</th>
+                                        <th>Status</th>
+                                        <th class="text-end">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="admin-attendees-table-body">
+                                    <tr><td colspan="8" class="text-center py-4 text-muted">Click to load attendees...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Create / Edit Event Modal -->
+    <div class="modal fade" id="eventModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content border-0 shadow-xl">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title fw-bold" id="eventModalTitle">Add New Event</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <form id="eventForm" onsubmit="saveEvent(event)">
+                        <input type="hidden" id="eventModalId" name="id">
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold small">Event Title *</label>
+                            <input type="text" id="eventModalTitleInput" class="form-control" placeholder="e.g. AI & Cloud Summit 2026" required>
+                        </div>
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold small">Category *</label>
+                                <select id="eventModalCategory" class="form-select" required>
+                                    <option value="Technology">Technology</option>
+                                    <option value="Music">Music</option>
+                                    <option value="Workshop">Workshop</option>
+                                    <option value="Business">Business</option>
+                                    <option value="Sports">Sports</option>
+                                    <option value="Cultural">Cultural</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold small">Status *</label>
+                                <select id="eventModalStatus" class="form-select">
+                                    <option value="UPCOMING">UPCOMING</option>
+                                    <option value="ONGOING">ONGOING</option>
+                                    <option value="COMPLETED">COMPLETED</option>
+                                    <option value="CANCELLED">CANCELLED</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold small">Event Date *</label>
+                                <input type="date" id="eventModalDate" class="form-control" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold small">Event Time *</label>
+                                <input type="text" id="eventModalTime" class="form-control" placeholder="e.g. 09:30 AM" required>
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-7">
+                                <label class="form-label fw-semibold small">Venue Location *</label>
+                                <input type="text" id="eventModalVenue" class="form-control" placeholder="e.g. Convention Center, Hall A" required>
+                            </div>
+                            <div class="col-md-5">
+                                <label class="form-label fw-semibold small">Organizer Name</label>
+                                <input type="text" id="eventModalOrganizer" class="form-control" placeholder="e.g. Tech Innovators">
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold small">Total Seat Capacity *</label>
+                                <input type="number" id="eventModalCapacity" class="form-control" min="1" value="100" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold small">Ticket Price (USD, 0 for Free) *</label>
+                                <input type="number" id="eventModalPrice" class="form-control" step="0.01" min="0" value="0.00" required>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold small">Banner Image URL</label>
+                            <input type="url" id="eventModalBanner" class="form-control" placeholder="https://images.unsplash.com/...">
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold small">Detailed Description *</label>
+                            <textarea id="eventModalDescription" class="form-control" rows="3" placeholder="Provide full event overview..." required></textarea>
+                        </div>
+
+                        <div class="d-flex justify-content-end gap-2">
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" id="btnSaveEvent" class="btn btn-primary-custom">
+                                <i class="bi bi-check2 me-1"></i> Save Event
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/app.js"></script>
+    <script>
+        let adminModalInstance = null;
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            await initAuth();
+            if (!AppState.currentUser || AppState.currentUser.role !== 'ADMIN') {
+                showToast('Administrator credentials required.', 'error');
+                setTimeout(() => { window.location.href = 'login.html'; }, 1000);
+                return;
+            }
+
+            adminModalInstance = new bootstrap.Modal(document.getElementById('eventModal'));
+            loadAdminKPIs();
+            loadAdminEventsTable();
+        });
+
+        async function loadAdminKPIs() {
+            try {
+                const res = await fetch(API.ANALYTICS);
+                const data = await res.json();
+                if (data.success && data.data) {
+                    const d = data.data;
+                    document.getElementById('kpiTotalEvents').innerText = d.totalEvents || 0;
+                    document.getElementById('kpiActiveRegistrations').innerText = d.activeRegistrations || 0;
+                    document.getElementById('kpiTotalRevenue').innerText = formatCurrency(d.totalRevenue);
+                    document.getElementById('kpiTotalUsers').innerText = d.totalUsers || 0;
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        async function loadAdminEventsTable() {
+            const tbody = document.getElementById('admin-events-table-body');
+            tbody.innerHTML = `<tr><td colspan="8" class="text-center py-4 text-muted"><div class="spinner-border spinner-border-sm text-primary me-2"></div>Loading events...</td></tr>`;
+
+            try {
+                const res = await fetch(API.EVENTS);
+                const data = await res.json();
+
+                if (data.success && Array.isArray(data.data)) {
+                    if (data.data.length === 0) {
+                        tbody.innerHTML = `<tr><td colspan="8" class="text-center py-4 text-muted">No events found. Click 'Add New Event' to create one.</td></tr>`;
+                        return;
+                    }
+
+                    tbody.innerHTML = data.data.map(ev => `
+                        <tr>
+                            <td><span class="badge bg-light text-dark border">#${ev.id}</span></td>
+                            <td>
+                                <strong>${ev.title}</strong>
+                                <small class="text-muted d-block text-truncate" style="max-width:260px;">${ev.venue}</small>
+                            </td>
+                            <td><span class="badge bg-secondary-subtle text-secondary-emphasis">${ev.category}</span></td>
+                            <td><small>${formatDate(ev.eventDate)}<br>${ev.eventTime}</small></td>
+                            <td>
+                                <strong>${ev.registeredCount}</strong> / ${ev.capacity}
+                                <div class="progress mt-1" style="height:4px; width:80px;">
+                                    <div class="progress-bar bg-primary" style="width:${Math.round((ev.registeredCount/ev.capacity)*100)}%"></div>
+                                </div>
+                            </td>
+                            <td><strong>${formatCurrency(ev.price)}</strong></td>
+                            <td><span class="status-badge status-${ev.status.toLowerCase()}">${ev.status}</span></td>
+                            <td class="text-end">
+                                <button class="btn btn-outline-primary btn-sm me-1" onclick='openEditEventModal(${JSON.stringify(ev)})'>
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                                <button class="btn btn-outline-danger btn-sm" onclick="deleteEvent(${ev.id})">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    `).join('');
+                }
+            } catch (e) {
+                tbody.innerHTML = `<tr><td colspan="8" class="text-center text-danger py-4">Error loading events.</td></tr>`;
+            }
+        }
+
+        async function loadAdminAttendees() {
+            const tbody = document.getElementById('admin-attendees-table-body');
+            tbody.innerHTML = `<tr><td colspan="8" class="text-center py-4 text-muted"><div class="spinner-border spinner-border-sm text-primary me-2"></div>Loading attendee bookings...</td></tr>`;
+
+            try {
+                const res = await fetch(API.ADMIN_REGISTRATIONS);
+                const data = await res.json();
+
+                if (data.success && Array.isArray(data.data)) {
+                    if (data.data.length === 0) {
+                        tbody.innerHTML = `<tr><td colspan="8" class="text-center py-4 text-muted">No registrations recorded yet.</td></tr>`;
+                        return;
+                    }
+
+                    tbody.innerHTML = data.data.map(reg => `
+                        <tr>
+                            <td><span class="ticket-code-badge font-monospace" style="font-size:0.8rem;">${reg.ticketCode}</span></td>
+                            <td>
+                                <strong>${reg.userName || 'Attendee'}</strong>
+                                <small class="text-muted d-block">${reg.userEmail || ''}</small>
+                            </td>
+                            <td>${reg.eventTitle}</td>
+                            <td><span class="badge bg-light text-dark border">${reg.ticketsCount}</span></td>
+                            <td><strong>${formatCurrency(reg.totalPrice)}</strong></td>
+                            <td><small>${formatDate(reg.registrationDate)}</small></td>
+                            <td><span class="status-badge status-${reg.status.toLowerCase()}">${reg.status}</span></td>
+                            <td class="text-end">
+                                ${reg.status === 'CONFIRMED' ? `
+                                    <button class="btn btn-outline-danger btn-sm" onclick="cancelRegistration(${reg.id})">
+                                        <i class="bi bi-x-circle"></i> Cancel
+                                    </button>
+                                ` : '<span class="text-muted small">N/A</span>'}
+                            </td>
+                        </tr>
+                    `).join('');
+                }
+            } catch (e) {
+                tbody.innerHTML = `<tr><td colspan="8" class="text-center text-danger py-4">Error loading attendees.</td></tr>`;
+            }
+        }
+
+        function openCreateEventModal() {
+            document.getElementById('eventForm').reset();
+            document.getElementById('eventModalId').value = '';
+            document.getElementById('eventModalTitle').innerText = 'Add New Event';
+            document.getElementById('eventModalDate').value = new Date().toISOString().split('T')[0];
+            adminModalInstance.show();
+        }
+
+        function openEditEventModal(ev) {
+            document.getElementById('eventModalId').value = ev.id;
+            document.getElementById('eventModalTitle').innerText = 'Edit Event #' + ev.id;
+            document.getElementById('eventModalTitleInput').value = ev.title;
+            document.getElementById('eventModalCategory').value = ev.category;
+            document.getElementById('eventModalStatus').value = ev.status;
+            document.getElementById('eventModalDate').value = ev.eventDate;
+            document.getElementById('eventModalTime').value = ev.eventTime;
+            document.getElementById('eventModalVenue').value = ev.venue;
+            document.getElementById('eventModalOrganizer').value = ev.organizer || '';
+            document.getElementById('eventModalCapacity').value = ev.capacity;
+            document.getElementById('eventModalPrice').value = ev.price;
+            document.getElementById('eventModalBanner').value = ev.bannerUrl || '';
+            document.getElementById('eventModalDescription').value = ev.description;
+
+            adminModalInstance.show();
+        }
+
+        async function saveEvent(e) {
+            e.preventDefault();
+            const id = document.getElementById('eventModalId').value;
+            const payload = {
+                title: document.getElementById('eventModalTitleInput').value.trim(),
+                category: document.getElementById('eventModalCategory').value,
+                status: document.getElementById('eventModalStatus').value,
+                eventDate: document.getElementById('eventModalDate').value,
+                eventTime: document.getElementById('eventModalTime').value.trim(),
+                venue: document.getElementById('eventModalVenue').value.trim(),
+                organizer: document.getElementById('eventModalOrganizer').value.trim(),
+                capacity: parseInt(document.getElementById('eventModalCapacity').value) || 100,
+                price: document.getElementById('eventModalPrice').value,
+                bannerUrl: document.getElementById('eventModalBanner').value.trim(),
+                description: document.getElementById('eventModalDescription').value.trim()
+            };
+
+            const isEdit = Boolean(id);
+            const method = isEdit ? 'PUT' : 'POST';
+            if (isEdit) payload.id = parseInt(id);
+
+            try {
+                const res = await fetch(API.ADMIN_EVENTS, {
+                    method: method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    showToast(`Event ${isEdit ? 'updated' : 'created'} successfully!`, 'success');
+                    adminModalInstance.hide();
+                    loadAdminEventsTable();
+                    loadAdminKPIs();
+                } else {
+                    showToast(data.message || 'Failed to save event.', 'error');
+                }
+            } catch (err) {
+                showToast('Server error while saving event.', 'error');
+            }
+        }
+
+        async function deleteEvent(eventId) {
+            if (!confirm('Are you sure you want to permanently delete this event?')) return;
+
+            try {
+                const res = await fetch(`${API.ADMIN_EVENTS}/${eventId}`, {
+                    method: 'DELETE'
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    showToast('Event deleted successfully.', 'success');
+                    loadAdminEventsTable();
+                    loadAdminKPIs();
+                } else {
+                    showToast(data.message || 'Failed to delete event.', 'error');
+                }
+            } catch (e) {
+                showToast('Error deleting event.', 'error');
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Analytics — EventHub</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-custom">
+        <div class="container">
+            <a class="navbar-brand brand-logo" href="index.html">
+                <div class="brand-icon"><i class="bi bi-bar-chart-fill"></i></div>
+                <span>EventHub Analytics</span>
+            </a>
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarMain">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4">
+                    <li class="nav-item"><a class="nav-link" href="admin.html">Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="analytics.html">Analytics</a></li>
+                    <li class="nav-item"><a class="nav-link" href="events.html" target="_blank">Browse Events</a></li>
+                </ul>
+                <div id="navbar-auth-section"></div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Header -->
+    <header class="bg-dark text-white py-4" style="background: linear-gradient(135deg, #0f172a, #1e293b) !important;">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <div>
+                    <h2 class="fw-bold mb-1"><i class="bi bi-graph-up-arrow me-2"></i>Registration &amp; Financial Analytics</h2>
+                    <p class="text-slate-400 mb-0">Visual data analytics powered by Chart.js (Lab Experiment 13 Mapping).</p>
+                </div>
+                <a href="admin.html" class="btn btn-outline-light btn-sm">
+                    <i class="bi bi-arrow-left me-1"></i> Back to Admin Hub
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content: Charts Grid -->
+    <main class="py-5 bg-light">
+        <div class="container">
+            <div class="row g-4 mb-4">
+                <!-- Chart 1: Category Distribution Doughnut -->
+                <div class="col-lg-6">
+                    <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="fw-bold mb-0">Registrations by Category</h5>
+                            <span class="badge bg-primary-subtle text-primary">Doughnut Chart</span>
+                        </div>
+                        <div style="position: relative; height: 320px;">
+                            <canvas id="categoryChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chart 2: Revenue by Category Bar -->
+                <div class="col-lg-6">
+                    <div class="card border-0 shadow-sm rounded-4 p-4 h-100">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="fw-bold mb-0">Gross Revenue by Category ($)</h5>
+                            <span class="badge bg-success-subtle text-success">Bar Chart</span>
+                        </div>
+                        <div style="position: relative; height: 320px;">
+                            <canvas id="revenueChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chart 3: Top Events Occupancy Rate -->
+            <div class="row g-4">
+                <div class="col-12">
+                    <div class="card border-0 shadow-sm rounded-4 p-4">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="fw-bold mb-0">Top Events: Seat Occupancy &amp; Bookings</h5>
+                            <span class="badge bg-info-subtle text-info">Comparative Bar Chart</span>
+                        </div>
+                        <div style="position: relative; height: 350px;">
+                            <canvas id="occupancyChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container text-center text-muted small">
+            <p>&copy; 2026 EventHub — Online Event Registration System.</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/app.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            await initAuth();
+            if (!AppState.currentUser || AppState.currentUser.role !== 'ADMIN') {
+                showToast('Administrator credentials required.', 'error');
+                setTimeout(() => { window.location.href = 'login.html'; }, 1000);
+                return;
+            }
+
+            renderAnalyticsCharts();
+        });
+
+        async function renderAnalyticsCharts() {
+            try {
+                const res = await fetch(API.ANALYTICS);
+                const data = await res.json();
+
+                if (data.success && data.data) {
+                    const categoryStats = data.data.categoryStats || [];
+                    const topEvents = data.data.topEvents || [];
+
+                    const catLabels = categoryStats.map(c => c.category);
+                    const catRegs = categoryStats.map(c => c.registrations);
+                    const catRevenues = categoryStats.map(c => c.revenue);
+
+                    const colors = [
+                        '#4f46e5', '#06b6d4', '#10b981', '#f59e0b', '#ec4899', '#8b5cf6'
+                    ];
+
+                    // 1. Doughnut Chart: Category Registrations
+                    new Chart(document.getElementById('categoryChart'), {
+                        type: 'doughnut',
+                        data: {
+                            labels: catLabels,
+                            datasets: [{
+                                data: catRegs,
+                                backgroundColor: colors,
+                                hoverOffset: 6
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: { position: 'bottom' }
+                            }
+                        }
+                    });
+
+                    // 2. Bar Chart: Revenue by Category
+                    new Chart(document.getElementById('revenueChart'), {
+                        type: 'bar',
+                        data: {
+                            labels: catLabels,
+                            datasets: [{
+                                label: 'Revenue ($)',
+                                data: catRevenues,
+                                backgroundColor: '#10b981',
+                                borderRadius: 6
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    ticks: {
+                                        callback: val => '$' + val
+                                    }
+                                }
+                            }
+                        }
+                    });
+
+                    // 3. Occupancy Rate Chart
+                    const eventTitles = topEvents.map(e => e.title.length > 25 ? e.title.substring(0, 25) + '...' : e.title);
+                    const bookedCounts = topEvents.map(e => e.registered);
+                    const capacities = topEvents.map(e => e.capacity);
+
+                    new Chart(document.getElementById('occupancyChart'), {
+                        type: 'bar',
+                        data: {
+                            labels: eventTitles,
+                            datasets: [
+                                {
+                                    label: 'Booked Seats',
+                                    data: bookedCounts,
+                                    backgroundColor: '#4f46e5',
+                                    borderRadius: 6
+                                },
+                                {
+                                    label: 'Total Capacity',
+                                    data: capacities,
+                                    backgroundColor: '#cbd5e1',
+                                    borderRadius: 6
+                                }
+                            ]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales: {
+                                y: { beginAtZero: true }
+                            },
+                            plugins: {
+                                legend: { position: 'top' }
+                            }
+                        }
+                    });
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        }
+    </script>
+</body>
+</html>

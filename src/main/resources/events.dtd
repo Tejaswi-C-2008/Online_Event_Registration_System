@@ -1,0 +1,15 @@
+<!ELEMENT events (event+)>
+<!ELEMENT event (title, organizer, date, time, venue, capacity, price, status, description)>
+<!ATTLIST event
+    id ID #REQUIRED
+    category (Technology|Music|Workshop|Business|Sports|Cultural) #REQUIRED>
+<!ELEMENT title (#PCDATA)>
+<!ELEMENT organizer (#PCDATA)>
+<!ELEMENT date (#PCDATA)>
+<!ELEMENT time (#PCDATA)>
+<!ELEMENT venue (#PCDATA)>
+<!ELEMENT capacity (#PCDATA)>
+<!ELEMENT price (#PCDATA)>
+<!ATTLIST price currency CDATA #FIXED "USD">
+<!ELEMENT status (#PCDATA)>
+<!ELEMENT description (#PCDATA)>

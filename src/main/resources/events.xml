@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE events SYSTEM "events.dtd">
+<events>
+    <event id="E101" category="Technology">
+        <title>Global AI and Cloud Summit 2026</title>
+        <organizer>AI Innovations Lab</organizer>
+        <date>2026-11-15</date>
+        <time>09:30 AM</time>
+        <venue>Tech Convention Center, Hall A</venue>
+        <capacity>250</capacity>
+        <price currency="USD">49.99</price>
+        <status>UPCOMING</status>
+        <description>Explore the bleeding edge of Artificial Intelligence, Cloud Computing, and Neural Architectures.</description>
+    </event>
+    <event id="E102" category="Music">
+        <title>International Jazz and Indie Beats</title>
+        <organizer>Harmony Productions</organizer>
+        <date>2026-10-25</date>
+        <time>06:00 PM</time>
+        <venue>Grand Symphony Amphitheatre</venue>
+        <capacity>400</capacity>
+        <price currency="USD">29.00</price>
+        <status>UPCOMING</status>
+        <description>An evening of electrifying jazz, soul, and indie acoustic performances by global artists.</description>
+    </event>
+    <event id="E103" category="Workshop">
+        <title>Full-Stack Web3 and Microservices Masterclass</title>
+        <organizer>CodeCraft Academy</organizer>
+        <date>2026-10-18</date>
+        <time>10:00 AM</time>
+        <venue>Silicon Valley Innovation Hub</venue>
+        <capacity>60</capacity>
+        <price currency="USD">15.00</price>
+        <status>UPCOMING</status>
+        <description>Hands-on coding masterclass covering microservices in Java and scalable cloud system design.</description>
+    </event>
+    <event id="E104" category="Business">
+        <title>Global Venture Startup Pitchfest</title>
+        <organizer>Venture Hub Network</organizer>
+        <date>2026-11-05</date>
+        <time>01:00 PM</time>
+        <venue>Metropolitan Business Tower</venue>
+        <capacity>150</capacity>
+        <price currency="USD">35.00</price>
+        <status>UPCOMING</status>
+        <description>Connect with angel investors, venture capitalists, and innovative tech entrepreneurs.</description>
+    </event>
+    <event id="E105" category="Sports">
+        <title>City Marathon and Fitness Carnival 2026</title>
+        <organizer>City Sports Commission</organizer>
+        <date>2026-11-20</date>
+        <time>06:00 AM</time>
+        <venue>Central Riverside Park</venue>
+        <capacity>500</capacity>
+        <price currency="USD">10.00</price>
+        <status>UPCOMING</status>
+        <description>Annual community run promoting wellness and youth athletics with awards and refreshments.</description>
+    </event>
+</events>
